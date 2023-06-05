@@ -1,7 +1,7 @@
-const { User, Thought } = require('../models');
+const { User, Thought } = require('../models/User');
+
 
 const userController = {
-  // GET /api/users
   getAllUsers(req, res) {
     User.find({})
       .populate({
@@ -13,11 +13,10 @@ const userController = {
         res.json(users);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to fetch users', error: err });
       });
   },
 
-  // GET /api/users/:userId
   getUserById(req, res) {
     User.findById(req.params.userId)
       .populate({
@@ -32,22 +31,20 @@ const userController = {
         res.json(user);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to fetch user', error: err });
       });
   },
 
-  // POST /api/users
   createUser(req, res) {
     User.create(req.body)
       .then((user) => {
-        res.json(user);
+        res.status(201).json(user);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to create user', error: err });
       });
   },
 
-  // PUT /api/users/:userId
   updateUser(req, res) {
     User.findByIdAndUpdate(req.params.userId, req.body, { new: true })
       .then((user) => {
@@ -57,29 +54,26 @@ const userController = {
         res.json(user);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to update user', error: err });
       });
   },
 
-  // DELETE /api/users/:userId
   deleteUser(req, res) {
     User.findByIdAndDelete(req.params.userId)
       .then((user) => {
         if (!user) {
           return res.status(404).json({ message: 'No user found with this id' });
         }
-        // Remove associated thoughts
         return Thought.deleteMany({ username: user.username });
       })
       .then(() => {
         res.json({ message: 'User and associated thoughts deleted successfully' });
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to delete user', error: err });
       });
   },
 
-  // POST /api/users/:userId/friends/:friendId
   addFriend(req, res) {
     User.findByIdAndUpdate(
       req.params.userId,
@@ -93,11 +87,10 @@ const userController = {
         res.json(user);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to add friend', error: err });
       });
   },
 
-  // DELETE /api/users/:userId/friends/:friendId
   removeFriend(req, res) {
     User.findByIdAndUpdate(
       req.params.userId,
@@ -111,7 +104,7 @@ const userController = {
         res.json(user);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to remove friend', error: err });
       });
   },
 };

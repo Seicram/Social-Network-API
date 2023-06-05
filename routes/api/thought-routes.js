@@ -15,13 +15,13 @@ router.route('/')
   .get(getAllThoughts)
   .post(createThought);
 
-//Get a single thought by its _id
+// Get a single thought by its _id
 router.route('/:thoughtId')
   .get(getThoughtById)
   .put(updateThought)
   .delete(deleteThought);
 
-  // POST to create a reaction stored in a single thought's reactions array field
+// POST to create a reaction stored in a single thought's reactions array field
 router.route('/:thoughtId/reactions')
   .post(createReaction)
   .delete(deleteReaction);

@@ -1,18 +1,17 @@
 const { Thought, User } = require('../models');
 
+
 const thoughtController = {
-  // GET /api/thoughts
   getAllThoughts(req, res) {
     Thought.find({})
       .then((thoughts) => {
         res.json(thoughts);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to fetch thoughts', error: err });
       });
   },
 
-  // GET /api/thoughts/:thoughtId
   getThoughtById(req, res) {
     Thought.findById(req.params.thoughtId)
       .then((thought) => {
@@ -22,16 +21,15 @@ const thoughtController = {
         res.json(thought);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to fetch thought', error: err });
       });
   },
 
-  // POST /api/thoughts
   createThought(req, res) {
     Thought.create(req.body)
       .then((thought) => {
         return User.findByIdAndUpdate(
-          thought.username,
+          thought.userId,
           { $push: { thoughts: thought._id } },
           { new: true }
         );
@@ -40,14 +38,13 @@ const thoughtController = {
         if (!user) {
           return res.status(404).json({ message: 'No user found with this id' });
         }
-        res.json(user);
+        res.status(201).json(user);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to create thought', error: err });
       });
   },
 
-  // PUT /api/thoughts/:thoughtId
   updateThought(req, res) {
     Thought.findByIdAndUpdate(req.params.thoughtId, req.body, { new: true })
       .then((thought) => {
@@ -57,11 +54,10 @@ const thoughtController = {
         res.json(thought);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to update thought', error: err });
       });
   },
 
-  // DELETE /api/thoughts/:thoughtId
   deleteThought(req, res) {
     Thought.findByIdAndDelete(req.params.thoughtId)
       .then((thought) => {
@@ -69,7 +65,7 @@ const thoughtController = {
           return res.status(404).json({ message: 'No thought found with this id' });
         }
         return User.findByIdAndUpdate(
-          thought.username,
+          thought.userId,
           { $pull: { thoughts: thought._id } },
           { new: true }
         );
@@ -81,11 +77,10 @@ const thoughtController = {
         res.json(user);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to delete thought', error: err });
       });
   },
 
-  // POST /api/thoughts/:thoughtId/reactions
   createReaction(req, res) {
     Thought.findByIdAndUpdate(
       req.params.thoughtId,
@@ -99,11 +94,10 @@ const thoughtController = {
         res.json(thought);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to create reaction', error: err });
       });
   },
 
-  // DELETE /api/thoughts/:thoughtId/reactions/:reactionId
   deleteReaction(req, res) {
     Thought.findByIdAndUpdate(
       req.params.thoughtId,
@@ -117,7 +111,7 @@ const thoughtController = {
         res.json(thought);
       })
       .catch((err) => {
-        res.status(500).json(err);
+        res.status(500).json({ message: 'Failed to delete reaction', error: err });
       });
   },
 };
