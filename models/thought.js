@@ -1,13 +1,7 @@
 const mongoose = require('mongoose');
 
-const { Schema } = mongoose;
-
-const reactionSchema = new Schema(
+const reactionSchema = new mongoose.Schema(
   {
-    reactionId: {
-      type: Schema.Types.ObjectId,
-      default: () => new mongoose.Types.ObjectId()
-    },
     reactionBody: {
       type: String,
       required: true,
@@ -20,13 +14,18 @@ const reactionSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      get: (timestamp) => new Date(timestamp).toISOString()
+      get: timestamp => new Date(timestamp).toLocaleString()
     }
   },
-  { _id: false } // Disable automatic _id generation for subdocuments
+  {
+    toJSON: {
+      getters: true
+    },
+    id: false
+  }
 );
 
-const thoughtSchema = new Schema(
+const thoughtSchema = new mongoose.Schema(
   {
     thoughtText: {
       type: String,
@@ -37,7 +36,7 @@ const thoughtSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      get: (timestamp) => new Date(timestamp).toISOString()
+      get: timestamp => new Date(timestamp).toLocaleString()
     },
     username: {
       type: String,
@@ -46,11 +45,15 @@ const thoughtSchema = new Schema(
     reactions: [reactionSchema]
   },
   {
-    toJSON: { getters: true },
-    toObject: { getters: true }
+    toJSON: {
+      virtuals: true,
+      getters: true
+    },
+    id: false
   }
 );
 
+// Virtual property to get the count of reactions
 thoughtSchema.virtual('reactionCount').get(function () {
   return this.reactions.length;
 });
@@ -58,3 +61,4 @@ thoughtSchema.virtual('reactionCount').get(function () {
 const Thought = mongoose.model('Thought', thoughtSchema);
 
 module.exports = Thought;
+

@@ -1,32 +1,31 @@
+// server.js
 const express = require('express');
-const mongoose = require('mongoose');
-
 const app = express();
-const PORT = process.env.PORT || 3001;
+const connectDB = require('./config/connection');
+const userRoutes = require('./routes/userRoutes');
+const thoughtRoutes = require('./routes/thoughtRoutes');
 
 // Middleware
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/social-media-api', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false
-}).then(() => {
-  console.log('Connected to the database');
-}).catch((error) => {
-  console.error('Database connection error:', error);
-});
-
-// API routes
-const userRoutes = require('./routes/api/user-routes');
-const thoughtRoutes = require('./routes/api/thought-routes');
-
+// Routes
 app.use('/api/users', userRoutes);
 app.use('/api/thoughts', thoughtRoutes);
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Handle 404 errors
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
 });
+
+// Start the server after successful database connection
+connectDB()
+  .then(() => {
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () => {
+      console.log(`Social Network API server now running on port ${PORT}! 🚀`);
+    });
+  })
+  .catch((error) => {
+    console.error('Error connecting to the database:', error);
+  });

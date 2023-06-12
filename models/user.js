@@ -1,42 +1,53 @@
 const mongoose = require('mongoose');
 
-// user schema
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    unique: true,
-    required: true,
-    trim: true
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true
+    },
+    email: {
+      type: String,
+      unique: true,
+      required: true,
+      match: /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[\w-]+$/
+    },
+    thoughts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Thought'
+      }
+    ],
+    friends: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    ]
   },
+  {
+    toJSON: {
+      virtuals: true,
+      getters: true
+    },
+    id: false
+  }
+);
 
-  // email validation
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    match: [/.+@.+\..+/, 'Please enter a valid email address']
-  },
-
-  // thoughts array
-  thoughts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Thought'
-  }],
-
-  // friends array
-  friends: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }]
-});
-
-// virtual called friendCount
-userSchema.virtual('friendCount').get(function() {
+// Virtual property to get the count of friends
+userSchema.virtual('friendCount').get(function () {
   return this.friends.length;
 });
 
-// create the User model using the UserSchema
+// Middleware to remove associated thoughts when a user is deleted
+userSchema.pre('remove', async function (next) {
+  await this.model('Thought').deleteMany({ username: this.username });
+  next();
+});
+
 const User = mongoose.model('User', userSchema);
 
-// export the User model
 module.exports = User;
+
